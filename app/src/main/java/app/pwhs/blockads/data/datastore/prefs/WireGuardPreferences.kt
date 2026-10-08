@@ -43,7 +43,7 @@ class WireGuardPreferences(private val dataStore: DataStore<Preferences>) {
     }
 
     val excludeLan: Flow<Boolean> = dataStore.data.map { prefs ->
-        prefs[KEY_EXCLUDE_LAN] ?: false
+        prefs[KEY_EXCLUDE_LAN] ?: true
     }
 
     val allowAppBypass: Flow<Boolean> = dataStore.data.map { prefs ->

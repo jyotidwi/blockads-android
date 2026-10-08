@@ -39,8 +39,8 @@ class WireGuardPreferencesTest {
     }
 
     @Test
-    fun `excludeLan stays opt-in`() = runTest {
-        assertFalse(newPreferences().excludeLan.first())
+    fun `excludeLan defaults to true`() = runTest {
+        assertTrue(newPreferences().excludeLan.first())
     }
 
     private fun profile(id: String, vararg allowed: String) = WireGuardProfile(

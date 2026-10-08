@@ -124,6 +124,17 @@ class VpnTunnelBuilder(
                     .setBlocking(false)
                     .setMtu(1350)
                 addIpv4Routes(b, excludeLan)
+                if (excludeLan && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    try {
+                        b.excludeRoute(IpPrefix(InetAddress.getByName("10.0.0.0"), 8))
+                        b.excludeRoute(IpPrefix(InetAddress.getByName("172.16.0.0"), 12))
+                        b.excludeRoute(IpPrefix(InetAddress.getByName("192.168.0.0"), 16))
+                        b.excludeRoute(IpPrefix(InetAddress.getByName("169.254.0.0"), 16))
+                        Timber.d("LAN excluded from direct mode VPN routes")
+                    } catch (e: Exception) {
+                        Timber.w(e, "Failed to exclude LAN routes")
+                    }
+                }
                 b
             }
 

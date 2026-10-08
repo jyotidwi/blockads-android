@@ -98,7 +98,7 @@ class AppPreferencesTest {
             assertEquals(AppPreferences.ROUTING_MODE_DIRECT, routingMode.first())
             assertTrue(wgProfiles.first().isEmpty())
             assertNull(wgActiveProfileId.first())
-            assertFalse(excludeLan.first())
+            assertTrue(excludeLan.first())
             assertFalse(allowAppBypass.first())
         }
     }

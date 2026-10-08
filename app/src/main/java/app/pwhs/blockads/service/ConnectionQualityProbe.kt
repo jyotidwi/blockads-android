@@ -33,7 +33,7 @@ data class ProbeResult(
  * Distinguishes between physical carrier/Wi-Fi connection loss vs VPN tunnel deadlock.
  */
 class ConnectionQualityProbe(
-    private val socketProtector: ((Int) -> Boolean)? = null,
+    private val socketProtector: ((Socket) -> Boolean)? = null,
     private val isEngineRunning: () -> Boolean = { true },
 ) {
     companion object {
@@ -60,17 +60,15 @@ class ConnectionQualityProbe(
     }
 
     private fun probeSocket(ip: String, port: Int): Boolean {
-        var socket: Socket? = null
+        var channel: java.nio.channels.SocketChannel? = null
         return try {
-            socket = Socket()
+            channel = java.nio.channels.SocketChannel.open()
+            channel.configureBlocking(true)
+            val socket = channel.socket()
             socketProtector?.let { protector ->
-                try {
-                    socket.bind(InetSocketAddress(0))
-                    val pfd = android.os.ParcelFileDescriptor.fromSocket(socket)
-                    protector(pfd.fd)
-                    pfd.detachFd()
-                } catch (e: Exception) {
-                    Timber.w(e, "Failed to protect probe socket")
+                val protected = protector(socket)
+                if (!protected) {
+                    Timber.w("Failed to protect probe socket")
                 }
             }
             val endpoint = InetSocketAddress(InetAddress.getByName(ip), port)
@@ -81,7 +79,7 @@ class ConnectionQualityProbe(
             false
         } finally {
             try {
-                socket?.close()
+                channel?.close()
             } catch (_: Exception) {}
         }
     }

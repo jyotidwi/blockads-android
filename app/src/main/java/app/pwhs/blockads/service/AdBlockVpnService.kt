@@ -136,7 +136,7 @@ class AdBlockVpnService : VpnService() {
             batteryMonitor = batteryMonitor,
             isRunningProvider = { isRunning },
             isIdleProvider = { !isRunning && !isConnecting && !isRestarting && !isStopping },
-            socketProtector = { fd -> protect(fd) },
+            socketProtector = { socket -> protect(socket) },
             isEngineRunning = { goTunnelAdapter.isEngineRunning() },
             onTearDownForRestart = { session.tearDownForRestart() },
             onStartVpn = { session.startFromSupervisor() },

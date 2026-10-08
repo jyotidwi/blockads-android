@@ -25,7 +25,7 @@ class VpnConnectionSupervisor(
     private val batteryMonitor: BatteryMonitor,
     private val isRunningProvider: () -> Boolean,
     private val isIdleProvider: () -> Boolean,
-    private val socketProtector: (Int) -> Boolean,
+    private val socketProtector: (java.net.Socket) -> Boolean,
     private val isEngineRunning: () -> Boolean,
     private val onTearDownForRestart: suspend () -> Unit,
     private val onStartVpn: () -> Unit,
