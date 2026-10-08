@@ -54,6 +54,8 @@ class VpnEngineCoordinatorTest {
         coEvery { getWgConfigJsonSnapshot() } answers { savedWgJson }
         coEvery { getFilterHttp3Snapshot() } returns false
         coEvery { getBlockDohBypassSnapshot() } returns true
+        coEvery { getUseSystemDnsOnTrustedEnabledSnapshot() } returns false
+        coEvery { getTrustedSsidsSnapshot() } returns emptySet()
     }
     private val domainCount = MutableStateFlow(100)
     private val filterRepo: FilterListRepository = mockk(relaxed = true) {

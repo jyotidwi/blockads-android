@@ -111,6 +111,7 @@ class AppPreferences internal constructor(
     val hideFromRecents: Flow<Boolean> get() = vpnSecurity.hideFromRecents
     val trustedSsids: Flow<Set<String>> get() = vpnSecurity.trustedSsids
     val pauseOnTrustedEnabled: Flow<Boolean> get() = vpnSecurity.pauseOnTrustedEnabled
+    val useSystemDnsOnTrustedEnabled: Flow<Boolean> get() = vpnSecurity.useSystemDnsOnTrustedEnabled
     val pausedByTrusted: Flow<Boolean> get() = vpnSecurity.pausedByTrusted
     val pausedTrustedSsid: Flow<String> get() = vpnSecurity.pausedTrustedSsid
     val filterHttp3: Flow<Boolean> get() = vpnSecurity.filterHttp3
@@ -182,6 +183,8 @@ class AppPreferences internal constructor(
     suspend fun setTrustedSsids(ssids: Set<String>) = vpnSecurity.setTrustedSsids(ssids)
     suspend fun toggleTrustedSsid(ssid: String) = vpnSecurity.toggleTrustedSsid(ssid)
     suspend fun setPauseOnTrustedEnabled(enabled: Boolean) = vpnSecurity.setPauseOnTrustedEnabled(enabled)
+    suspend fun setUseSystemDnsOnTrustedEnabled(enabled: Boolean) = vpnSecurity.setUseSystemDnsOnTrustedEnabled(enabled)
+    suspend fun getUseSystemDnsOnTrustedEnabledSnapshot(): Boolean = vpnSecurity.getUseSystemDnsOnTrustedEnabledSnapshot()
     suspend fun getTrustedSsidsSnapshot(): Set<String> = vpnSecurity.getTrustedSsidsSnapshot()
     suspend fun getPauseOnTrustedEnabledSnapshot(): Boolean = vpnSecurity.getPauseOnTrustedEnabledSnapshot()
     suspend fun setPausedByTrusted(value: Boolean, ssid: String = "") = vpnSecurity.setPausedByTrusted(value, ssid)

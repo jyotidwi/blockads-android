@@ -23,6 +23,9 @@ class TrustedNetworksViewModel(
     val pauseOnTrustedEnabled: StateFlow<Boolean> = appPrefs.pauseOnTrustedEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
+    val useSystemDnsOnTrustedEnabled: StateFlow<Boolean> = appPrefs.useSystemDnsOnTrustedEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     /** Current connected SSID, or null if not on Wi-Fi / no location permission. */
     private val _currentSsid = MutableStateFlow<String?>(null)
     val currentSsid: StateFlow<String?> = _currentSsid.asStateFlow()
@@ -33,7 +36,21 @@ class TrustedNetworksViewModel(
     }
 
     fun setPauseOnTrustedEnabled(enabled: Boolean) {
-        viewModelScope.launch { appPrefs.setPauseOnTrustedEnabled(enabled) }
+        viewModelScope.launch {
+            appPrefs.setPauseOnTrustedEnabled(enabled)
+            if (enabled) {
+                appPrefs.setUseSystemDnsOnTrustedEnabled(false)
+            }
+        }
+    }
+
+    fun setUseSystemDnsOnTrustedEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setUseSystemDnsOnTrustedEnabled(enabled)
+            if (enabled) {
+                appPrefs.setPauseOnTrustedEnabled(false)
+            }
+        }
     }
 
     fun addCurrentNetwork() {

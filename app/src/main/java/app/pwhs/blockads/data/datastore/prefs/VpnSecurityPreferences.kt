@@ -35,6 +35,7 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
         val KEY_HIDE_FROM_RECENTS = booleanPreferencesKey("hide_from_recents")
         val KEY_TRUSTED_SSIDS = stringSetPreferencesKey("trusted_ssids")
         val KEY_PAUSE_ON_TRUSTED = booleanPreferencesKey("pause_on_trusted")
+        val KEY_USE_SYSTEM_DNS_ON_TRUSTED = booleanPreferencesKey("use_system_dns_on_trusted")
         val KEY_PAUSED_BY_TRUSTED = booleanPreferencesKey("paused_by_trusted")
         val KEY_PAUSED_TRUSTED_SSID = stringPreferencesKey("paused_trusted_ssid")
         val KEY_VPN_REVOKED_BY_ANOTHER_APP = booleanPreferencesKey("vpn_revoked_by_another_app")
@@ -119,6 +120,10 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
 
     val pausedTrustedSsid: Flow<String> = dataStore.data.map { prefs ->
         prefs[KEY_PAUSED_TRUSTED_SSID] ?: ""
+    }
+
+    val useSystemDnsOnTrustedEnabled: Flow<Boolean> = dataStore.data.map { prefs ->
+        prefs[KEY_USE_SYSTEM_DNS_ON_TRUSTED] ?: false
     }
 
     suspend fun setVpnEnabled(enabled: Boolean) {
@@ -229,6 +234,13 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
     suspend fun setPauseOnTrustedEnabled(enabled: Boolean) {
         dataStore.edit { it[KEY_PAUSE_ON_TRUSTED] = enabled }
     }
+
+    suspend fun setUseSystemDnsOnTrustedEnabled(enabled: Boolean) {
+        dataStore.edit { it[KEY_USE_SYSTEM_DNS_ON_TRUSTED] = enabled }
+    }
+
+    suspend fun getUseSystemDnsOnTrustedEnabledSnapshot(): Boolean =
+        dataStore.data.map { it[KEY_USE_SYSTEM_DNS_ON_TRUSTED] ?: false }.first()
 
     suspend fun getTrustedSsidsSnapshot(): Set<String> =
         dataStore.data.map { it[KEY_TRUSTED_SSIDS] ?: emptySet() }.first()

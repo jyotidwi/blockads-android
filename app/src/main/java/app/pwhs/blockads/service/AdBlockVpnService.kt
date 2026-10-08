@@ -160,6 +160,11 @@ class AdBlockVpnService : VpnService() {
                     // to hide the Wi-Fi icon when turning on Wi-Fi while on mobile data.
                     setUnderlyingNetworks(null)
                     Timber.d("Reset underlying network to system default (null)")
+                    if (isRunning && ::goTunnelAdapter.isInitialized) {
+                        serviceScope.launch {
+                            engineCoordinator.reloadDns(goTunnelAdapter)
+                        }
+                    }
                 } catch (e: Exception) {
                     Timber.w(e, "Failed to set underlying network")
                 }
@@ -189,6 +194,17 @@ class AdBlockVpnService : VpnService() {
             appPrefs.blockDohBypass.collect { enabled ->
                 if (::goTunnelAdapter.isInitialized) goTunnelAdapter.setBlockDohBypass(enabled)
             }
+        }
+        serviceScope.launch {
+            kotlinx.coroutines.flow.combine(
+                appPrefs.useSystemDnsOnTrustedEnabled,
+                appPrefs.trustedSsids
+            ) { enabled, ssids -> enabled to ssids }
+                .collect {
+                    if (isRunning && ::goTunnelAdapter.isInitialized) {
+                        engineCoordinator.reloadDns(goTunnelAdapter)
+                    }
+                }
         }
     }
 

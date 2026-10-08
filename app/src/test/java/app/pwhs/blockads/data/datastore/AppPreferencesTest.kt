@@ -72,6 +72,7 @@ class AppPreferencesTest {
             assertFalse(hideFromRecents.first())
             assertTrue(trustedSsids.first().isEmpty())
             assertFalse(pauseOnTrustedEnabled.first())
+            assertFalse(useSystemDnsOnTrustedEnabled.first())
             assertFalse(pausedByTrusted.first())
             assertEquals("", pausedTrustedSsid.first())
             assertTrue(filterHttp3.first())

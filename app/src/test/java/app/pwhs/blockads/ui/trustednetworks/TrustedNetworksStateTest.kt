@@ -29,9 +29,11 @@ class TrustedNetworksStateTest {
 
     private val ssids = MutableStateFlow(setOf("Home", "Office"))
     private val pause = MutableStateFlow(false)
+    private val useSystemDns = MutableStateFlow(false)
     private val appPrefs: AppPreferences = mockk(relaxed = true) {
         every { trustedSsids } returns ssids
         every { pauseOnTrustedEnabled } returns pause
+        every { useSystemDnsOnTrustedEnabled } returns useSystemDns
         coEvery { getTrustedSsidsSnapshot() } answers { ssids.value }
         coEvery { setTrustedSsids(any()) } coAnswers { ssids.value = firstArg() }
     }
@@ -47,10 +49,12 @@ class TrustedNetworksStateTest {
 
     @Test
     fun `state mirrors preferences`() = runTest {
-        keepHot(vm.trustedSsids, vm.pauseOnTrustedEnabled)
+        keepHot(vm.trustedSsids, vm.pauseOnTrustedEnabled, vm.useSystemDnsOnTrustedEnabled)
         pause.value = true
+        useSystemDns.value = true
         assertEquals(setOf("Home", "Office"), vm.trustedSsids.value)
         assertTrue(vm.pauseOnTrustedEnabled.value)
+        assertTrue(vm.useSystemDnsOnTrustedEnabled.value)
     }
 
     @Test

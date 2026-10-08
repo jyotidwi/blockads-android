@@ -72,6 +72,8 @@
     <string name="trusted_networks_settings_desc">Auto-pause BlockAds on chosen Wi-Fi networks</string>
     <string name="trusted_networks_toggle">Pause on trusted networks</string>
     <string name="trusted_networks_desc">BlockAds turns off on these Wi-Fi networks and back on when you leave.</string>
+    <string name="trusted_networks_use_system_dns_toggle">Use system DNS on trusted networks</string>
+    <string name="trusted_networks_use_system_dns_desc">Keep ad blocking active but use the Wi-Fi network\'s local DNS server to resolve internal domains.</string>
     <string name="trusted_networks_add_current">Add current Wi-Fi network</string>
     <string name="trusted_networks_no_wifi">Not connected to Wi-Fi (or location permission needed)</string>
     <string name="trusted_networks_list_header">Trusted Wi-Fi networks</string>

@@ -46,9 +46,12 @@ class TrustedNetworksViewModelTest {
         appPrefs = mockk(relaxed = true) {
             every { trustedSsids } returns security.trustedSsids
             every { pauseOnTrustedEnabled } returns security.pauseOnTrustedEnabled
+            every { useSystemDnsOnTrustedEnabled } returns security.useSystemDnsOnTrustedEnabled
             coEvery { toggleTrustedSsid(any()) } coAnswers { security.toggleTrustedSsid(firstArg()) }
             coEvery { setTrustedSsids(any()) } coAnswers { security.setTrustedSsids(firstArg()) }
             coEvery { getTrustedSsidsSnapshot() } coAnswers { security.getTrustedSsidsSnapshot() }
+            coEvery { setPauseOnTrustedEnabled(any()) } coAnswers { security.setPauseOnTrustedEnabled(firstArg()) }
+            coEvery { setUseSystemDnsOnTrustedEnabled(any()) } coAnswers { security.setUseSystemDnsOnTrustedEnabled(firstArg()) }
         }
         mockkObject(TrustedNetworkManager.Companion)
         every { TrustedNetworkManager.currentSsid(any()) } returns "Home"
@@ -86,5 +89,18 @@ class TrustedNetworksViewModelTest {
         vm.runAndSettle { addCurrentNetwork() }
 
         assertEquals(setOf("Home"), runBlocking { security.getTrustedSsidsSnapshot() })
+    }
+
+    @Test
+    fun `enabling useSystemDns turns off pauseOnTrusted and vice versa`() {
+        val vm = TrustedNetworksViewModel(appPrefs, mockk<Application>(relaxed = true))
+
+        vm.runAndSettle { setPauseOnTrustedEnabled(true) }
+        org.junit.Assert.assertTrue(runBlocking { security.getPauseOnTrustedEnabledSnapshot() })
+        org.junit.Assert.assertFalse(runBlocking { security.getUseSystemDnsOnTrustedEnabledSnapshot() })
+
+        vm.runAndSettle { setUseSystemDnsOnTrustedEnabled(true) }
+        org.junit.Assert.assertFalse(runBlocking { security.getPauseOnTrustedEnabledSnapshot() })
+        org.junit.Assert.assertTrue(runBlocking { security.getUseSystemDnsOnTrustedEnabledSnapshot() })
     }
 }

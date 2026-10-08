@@ -57,6 +57,7 @@ fun TrustedNetworksScreen(
     val context = LocalContext.current
     val trusted by viewModel.trustedSsids.collectAsStateWithLifecycle()
     val enabled by viewModel.pauseOnTrustedEnabled.collectAsStateWithLifecycle()
+    val useSystemDns by viewModel.useSystemDnsOnTrustedEnabled.collectAsStateWithLifecycle()
     val currentSsid by viewModel.currentSsid.collectAsStateWithLifecycle()
 
     val locationLauncher = rememberLauncherForActivityResult(
@@ -109,33 +110,64 @@ fun TrustedNetworksScreen(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Master toggle
+            // Action toggles on trusted networks
             SettingsCard {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    SettingIconBadge(
-                        painter = painterResource(R.drawable.ic_settings_trusted_wifi),
-                        tint = Color(0xFF059669)
-                    )
-                    Spacer(modifier = Modifier.width(14.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            stringResource(R.string.trusted_networks_toggle),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        SettingIconBadge(
+                            painter = painterResource(R.drawable.ic_settings_trusted_wifi),
+                            tint = Color(0xFF059669)
                         )
-                        Text(
-                            stringResource(R.string.trusted_networks_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                stringResource(R.string.trusted_networks_toggle),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                stringResource(R.string.trusted_networks_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Switch(checked = enabled, onCheckedChange = { viewModel.setPauseOnTrustedEnabled(it) })
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Switch(checked = enabled, onCheckedChange = { viewModel.setPauseOnTrustedEnabled(it) })
+
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = dividerColor)
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        SettingIconBadge(
+                            painter = painterResource(R.drawable.ic_settings_dns),
+                            tint = Color(0xFF2563EB)
+                        )
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                stringResource(R.string.trusted_networks_use_system_dns_toggle),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                stringResource(R.string.trusted_networks_use_system_dns_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Switch(checked = useSystemDns, onCheckedChange = { viewModel.setUseSystemDnsOnTrustedEnabled(it) })
+                    }
                 }
             }
 

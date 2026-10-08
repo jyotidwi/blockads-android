@@ -10,6 +10,7 @@ import app.pwhs.blockads.data.entities.DnsProtocol
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.service.FirewallManager
 import app.pwhs.blockads.service.GoTunnelAdapter
+import app.pwhs.blockads.service.TrustedNetworkManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -94,12 +95,13 @@ class VpnEngineCoordinator(
         var finalFallbackDns = config.fallbackDns
         var finalDnsProtocol = config.dnsProtocol.name
 
-        if (config.dnsProviderId == "system") {
+        val onTrustedWithSystemDns = isTrustedNetworkWithSystemDns()
+        if (config.dnsProviderId == "system" || onTrustedWithSystemDns) {
             val systemDnsList = getSystemDnsServers(context)
             val (primary, fallback) = resolveSystemDnsPair(systemDnsList, config.fallbackDns)
             finalUpstreamDns = primary
             finalFallbackDns = fallback
-            Timber.d("System DNS resolved to primary: $finalUpstreamDns, fallback: $finalFallbackDns")
+            Timber.d("System DNS resolved to primary: $finalUpstreamDns, fallback: $finalFallbackDns (onTrusted=$onTrustedWithSystemDns)")
             finalDnsProtocol = "PLAIN"
         }
 
@@ -115,6 +117,45 @@ class VpnEngineCoordinator(
 
         val splitDnsZones = appPrefs.splitDnsZones.first()
         goTunnelAdapter.setSplitDNSZones(splitDnsZones)
+    }
+
+    suspend fun isTrustedNetworkWithSystemDns(): Boolean {
+        if (!appPrefs.getUseSystemDnsOnTrustedEnabledSnapshot()) return false
+        val ssid = TrustedNetworkManager.currentSsid(context) ?: return false
+        val trusted = appPrefs.getTrustedSsidsSnapshot()
+        return ssid in trusted
+    }
+
+    suspend fun reloadDns(goTunnelAdapter: GoTunnelAdapter) {
+        val providerId = appPrefs.dnsProviderId.first()
+        val onTrustedWithSystemDns = isTrustedNetworkWithSystemDns()
+        val configuredFallback = appPrefs.fallbackDns.first()
+        val dohUrl = appPrefs.dohUrl.first()
+        val odohRelayUrl = appPrefs.odohRelayUrl.first()
+
+        if (providerId == "system" || onTrustedWithSystemDns) {
+            val systemDnsList = getSystemDnsServers(context)
+            val (primary, fallback) = resolveSystemDnsPair(systemDnsList, configuredFallback)
+            Timber.d("Reloading DNS -> System DNS (primary: $primary, fallback: $fallback, onTrusted=$onTrustedWithSystemDns)")
+            goTunnelAdapter.configureDns(
+                protocol = "PLAIN",
+                primary = primary,
+                fallback = fallback,
+                dohUrl = dohUrl,
+                odohRelayUrl = odohRelayUrl
+            )
+        } else {
+            val upstreamDns = appPrefs.upstreamDns.first()
+            val dnsProtocol = appPrefs.dnsProtocol.first().name
+            Timber.d("Reloading DNS -> Configured DNS ($dnsProtocol, primary: $upstreamDns, fallback: $configuredFallback)")
+            goTunnelAdapter.configureDns(
+                protocol = dnsProtocol,
+                primary = upstreamDns,
+                fallback = configuredFallback,
+                dohUrl = dohUrl,
+                odohRelayUrl = odohRelayUrl
+            )
+        }
     }
 
     suspend fun startTunnel(
@@ -153,7 +194,8 @@ class VpnEngineCoordinator(
         linkProperties: LinkProperties?
     ) {
         val providerId = appPrefs.dnsProviderId.first()
-        if (providerId == "system") {
+        val onTrustedWithSystemDns = isTrustedNetworkWithSystemDns()
+        if (providerId == "system" || onTrustedWithSystemDns) {
             val newDns = linkProperties?.dnsServers?.mapNotNull { it.hostAddress }
                 ?.filter { it.isNotEmpty() } ?: emptyList()
             val configuredFallback = appPrefs.fallbackDns.first()
